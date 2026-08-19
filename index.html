@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار أعلام الدول | Flags Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- مكتبة المفرقعات الاحتفالية Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', 'Poppins', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .lang-btn {
+            background: #e0e7ff;
+            color: var(--primary);
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .lang-btn:hover {
+            background: #c7d2fe;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .flag-card {
+            width: 100%;
+            height: 180px;
+            background: #f9fafb;
+            border: 2px dashed #e5e7eb;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #flag {
+            max-width: 85%;
+            max-height: 85%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            border-radius: 4px;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: #f9fafb;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: #eef2ff;
+            color: var(--primary);
+        }
+
+        .option-btn.correct {
+            background: var(--success) !important;
+            color: white !important;
+            border-color: var(--success) !important;
+        }
+
+        .option-btn.wrong {
+            background: var(--danger) !important;
+            color: white !important;
+            border-color: var(--danger) !important;
+        }
+
+        .floating-emoji {
+            position: fixed;
+            bottom: -50px;
+            font-size: 3rem;
+            z-index: 999;
+            pointer-events: none;
+            animation: flyToSky 1.5s ease-out forwards;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        @keyframes flyToSky {
+            0% {
+                bottom: -50px;
+                opacity: 0;
+                transform: scale(0.5) rotate(0deg);
+            }
+            20% {
+                opacity: 1;
+                transform: scale(1.3) rotate(-10deg);
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                bottom: 85vh;
+                opacity: 0;
+                transform: scale(1) rotate(15deg);
+            }
+        }
+
+        #hint-box {
+            margin-top: 15px;
+            padding: 10px;
+            background: #fffbeeb0;
+            border: 1px solid #fef3c7;
+            border-radius: 8px;
+            color: #d97706;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .result-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .result-screen h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .result-screen p {
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .restart-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .restart-btn:hover {
+            background: var(--primary-hover);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Quiz Main Screen -->
+        <div id="quiz-screen">
+            <div class="header">
+                <h1 id="title">اختبار أعلام الدول</h1>
+                <button onclick="toggleLang()" class="lang-btn" id="lang-toggle">English</button>
+            </div>
+
+            <div class="stats">
+                <span><span id="score-label">النقاط</span>: <strong id="score">0</strong></span>
+                <span><span id="q-label">السؤال</span>: <strong id="q-count">1/5</strong></span>
+            </div>
+
+            <div class="flag-card">
+                <img id="flag" src="" alt="علم الدولة">
+            </div>
+
+            <div class="options-grid" id="options"></div>
+
+            <div id="hint-box">
+                💡 <span id="hint-text"></span>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="result-screen">
+            <h2 id="result-title">إكتمل الاختبار! 🎉</h2>
+            <p><span id="result-desc">نتيجتك النهائية هي:</span> <strong id="final-score">0</strong> / <span id="total-q">5</span></p>
+            <button onclick="restartQuiz()" class="restart-btn" id="restart-btn">إعادة الاختبار</button>
+        </div>
+    </div>
+
+    <script>
+        let lang = "ar";
+        let score = 0;
+        let questionIndex = 0;
+        const totalQuestions = 5;
+        let current;
+        let isAnswered = false;
+
+        const countries = [
+            // الدول السابقة
+            { name_ar: "فرنسا", name_en: "France", flag: "https://flagcdn.com/fr.svg", hint_ar: "تشتهر ببرج إيفل", hint_en: "Famous for the Eiffel Tower" },
+            { name_ar: "إيطاليا", name_en: "Italy", flag: "https://flagcdn.com/it.svg", hint_ar: "تشتهر بالبيتزا والمعكرونة", hint_en: "Famous for pizza and pasta" },
+            { name_ar: "البرازيل", name_en: "Brazil", flag: "https://flagcdn.com/br.svg", hint_ar: "أكبر دولة في أمريكا الجنوبية", hint_en: "Largest country in South America" },
+            { name_ar: "اليابان", name_en: "Japan", flag: "https://flagcdn.com/jp.svg", hint_ar: "تشتهر بالأنمي والتكنولوجيا", hint_en: "Famous for anime and technology" },
+            { name_ar: "السعودية", name_en: "Saudi Arabia", flag: "https://flagcdn.com/sa.svg", hint_ar: "موطن الحرمين الشريفين", hint_en: "Home of the Two Holy Mosques" },
+            { name_ar: "مصر", name_en: "Egypt", flag: "https://flagcdn.com/eg.svg", hint_ar: "تشتهر بالأهرامات", hint_en: "Famous for the Pyramids" },
+            { name_ar: "ألمانيا", name_en: "Germany", flag: "https://flagcdn.com/de.svg", hint_ar: "تشتهر بصناعة السيارات", hint_en: "Famous for car manufacturing" },
+            
+            // 10 دول جديدة مضافة
+            { name_ar: "الإمارات", name_en: "United Arab Emirates", flag: "https://flagcdn.com/ae.svg", hint_ar: "موطن برج خليفة", hint_en: "Home of Burj Khalifa" },
+            { name_ar: "المغرب", name_en: "Morocco", flag: "https://flagcdn.com/ma.svg", hint_ar: "تشتهر بقلعة أيت بن حدو وأسلوب العمارة الأندلسي", hint_en: "Famous for Aït Benhaddou and Moorish architecture" },
+            { name_ar: "إسبانيا", name_en: "Spain", flag: "https://flagcdn.com/es.svg", hint_ar: "تشتهر برقصة الفلامنكو وكرة القدم", hint_en: "Famous for Flamenco dance and football" },
+            { name_ar: "المملكة المتحدة", name_en: "United Kingdom", flag: "https://flagcdn.com/gb.svg", hint_ar: "موطن ساعة بيغ بن", hint_en: "Home of Big Ben" },
+            { name_ar: "الولايات المتحدة", name_en: "United States", flag: "https://flagcdn.com/us.svg", hint_ar: "موطن تمثال الحرية", hint_en: "Home of the Statue of Liberty" },
+            { name_ar: "كندا", name_en: "Canada", flag: "https://flagcdn.com/ca.svg", hint_ar: "يوجد ورقة شجر القيقب على علمها", hint_en: "Features a maple leaf on its flag" },
+            { name_ar: "تركيا", name_en: "Turkey", flag: "https://flagcdn.com/tr.svg", hint_ar: "تضم مدينة إسطنبول ومتحف آيا صوفيا", hint_en: "Home to Istanbul and Hagia Sophia" },
+            { name_ar: "أستراليا", name_en: "Australia", flag: "https://flagcdn.com/au.svg", hint_ar: "موطن حيوان الكنغر", hint_en: "Home of the kangaroo" },
+            { name_ar: "الأرجنتين", name_en: "Argentina", flag: "https://flagcdn.com/ar.svg", hint_ar: "تشتهر برقصة التانغو وجبال الأنديز", hint_en: "Famous for Tango dance and the Andes" },
+            { name_ar: "الهند", name_en: "India", flag: "https://flagcdn.com/in.svg", hint_ar: "موطن تاج محل", hint_en: "Home of Taj Mahal" }
+        ];
+
+        let availableCountries = [];
+
+        function initQuiz() {
+            score = 0;
+            questionIndex = 0;
+            availableCountries = [...countries];
+            document.getElementById("score").innerText = score;
+            document.getElementById("quiz-screen").style.display = "block";
+            document.getElementById("result-screen").style.display = "none";
+            loadQuestion();
+        }
+
+        function toggleLang() {
+            lang = lang === "ar" ? "en" : "ar";
+            document.documentElement.setAttribute("lang", lang);
+            document.documentElement.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+            
+            document.getElementById("title").innerText = lang === "ar" ? "اختبار أعلام الدول" : "Flags Quiz";
+            document.getElementById("lang-toggle").innerText = lang === "ar" ? "English" : "عربي";
+            document.getElementById("score-label").innerText = lang === "ar" ? "النقاط" : "Score";
+            document.getElementById("q-label").innerText = lang === "ar" ? "السؤال" : "Question";
+            document.getElementById("result-title").innerText = lang === "ar" ? "إكتمل الاختبار! 🎉" : "Quiz Completed! 🎉";
+            document.getElementById("result-desc").innerText = lang === "ar" ? "نتيجتك النهائية هي:" : "Your final score is:";
+            document.getElementById("restart-btn").innerText = lang === "ar" ? "إعادة الاختبار" : "Restart Quiz";
+
+            updateQuestionUI();
+        }
+
+        function loadQuestion() {
+            if (questionIndex >= totalQuestions || availableCountries.length === 0) {
+                showResults();
+                return;
+            }
+
+            isAnswered = false;
+            document.getElementById("hint-box").style.display = "none";
+
+            const randIdx = Math.floor(Math.random() * availableCountries.length);
+            current = availableCountries[randIdx];
+            availableCountries.splice(randIdx, 1);
+
+            document.getElementById("flag").src = current.flag;
+            document.getElementById("q-count").innerText = `${questionIndex + 1}/${totalQuestions}`;
+
+            updateQuestionUI();
+        }
+
+        function updateQuestionUI() {
+            if (!current) return;
+
+            let correctName = lang === "ar" ? current.name_ar : current.name_en;
+            
+            let options = [correctName];
+            while (options.length < 3) {
+                let random = countries[Math.floor(Math.random() * countries.length)];
+                let name = lang === "ar" ? random.name_ar : random.name_en;
+                if (!options.includes(name)) options.push(name);
+            }
+            
+            options.sort(() => Math.random() - 0.5);
+
+            let optionsBox = document.getElementById("options");
+            optionsBox.innerHTML = "";
+
+            options.forEach(opt => {
+                let btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, correctName, btn);
+                optionsBox.appendChild(btn);
+            });
+
+            if (document.getElementById("hint-box").style.display === "block") {
+                document.getElementById("hint-text").innerText = lang === "ar" ? current.hint_ar : current.hint_en;
+            }
+        }
+
+        function checkAnswer(selected, correct, btn) {
+            if (isAnswered) return;
+
+            const allBtns = document.querySelectorAll('.option-btn');
+
+            if (selected === correct) {
+                btn.classList.add("correct");
+                spawnSkyEmojis("👏");
+                
+                score++;
+                document.getElementById("score").innerText = score;
+                isAnswered = true;
+                disableButtons(allBtns);
+                setTimeout(() => {
+                    questionIndex++;
+                    loadQuestion();
+                }, 1200);
+            } else {
+                btn.classList.add("wrong");
+                spawnSkyEmojis("👎");
+                
+                document.getElementById("hint-text").innerText = lang === "ar" ? current.hint_ar : current.hint_en;
+                document.getElementById("hint-box").style.display = "block";
+            }
+        }
+
+        function spawnSkyEmojis(emojiSymbol) {
+            const count = 5;
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    let emoji = document.createElement("div");
+                    emoji.className = "floating-emoji";
+                    emoji.innerText = emojiSymbol;
+
+                    const randomX = Math.random() * 80 + 10; 
+                    emoji.style.left = randomX + "vw";
+
+                    document.body.appendChild(emoji);
+
+                    setTimeout(() => {
+                        emoji.remove();
+                    }, 1500);
+                }, i * 150);
+            }
+        }
+
+        function disableButtons(buttons) {
+            buttons.forEach(b => b.disabled = true);
+        }
+
+        function showResults() {
+            document.getElementById("quiz-screen").style.display = "none";
+            document.getElementById("result-screen").style.display = "block";
+            document.getElementById("final-score").innerText = score;
+            document.getElementById("total-q").innerText = totalQuestions;
+
+            if (score >= Math.ceil(totalQuestions / 2)) {
+                triggerConfetti();
+            }
+        }
+
+        function triggerConfetti() {
+            let duration = 3 * 1000;
+            let end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 }
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 }
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            })();
+        }
+
+        function restartQuiz() {
+            initQuiz();
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
